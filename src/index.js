@@ -1,7 +1,6 @@
 import fs from 'fs';
 
 export default (pathToFile1, pathToFile2) => {
-
   const beforeConfig = JSON.parse(fs.readFileSync(pathToFile1, 'utf8'));
   const afterConfig = JSON.parse(fs.readFileSync(pathToFile2, 'utf8'));
   const removedOrChangedEntries = Object.keys(beforeConfig).reduce((acc, key) => {
