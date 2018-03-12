@@ -1,8 +1,8 @@
-import fs from 'fs';
+import configParser from './configParser';
 
 export default (pathToFile1, pathToFile2) => {
-  const beforeConfig = JSON.parse(fs.readFileSync(pathToFile1, 'utf8'));
-  const afterConfig = JSON.parse(fs.readFileSync(pathToFile2, 'utf8'));
+  const beforeConfig = configParser(pathToFile1);
+  const afterConfig = configParser(pathToFile2);
   const removedOrChangedEntries = Object.keys(beforeConfig).reduce((acc, key) => {
     const beforeValue = beforeConfig[key];
     const afterValue = afterConfig[key];
