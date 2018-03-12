@@ -3,8 +3,15 @@
   "version": "0.1.0",
   "description": "Hexlet education project #2",
   "main": "index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "babel-node": "babel-node",
+    "build": "NODE_ENV=production babel src --out-dir dist --source-maps inline",
+    "prepublishOnly": "npm run build",
+    "eslint": "./node_modules/.bin/eslint"
   },
   "repository": {
     "type": "git",
