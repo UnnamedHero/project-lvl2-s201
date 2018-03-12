@@ -7,8 +7,7 @@ describe('gendiff', () => {
   test('with plain json', () => {
     const expected = fs.readFileSync(`${fixturePath}/plain-json-expected.txt`, 'utf8');
     const beforeFile = `${fixturePath}/before.json`;
-    const afterFile = `${fixturePath}/after.json`;
-    //console.log(expected);
+    const afterFile = `${fixturePath}/after.json`;    
     expect(gendiff(beforeFile, afterFile)).toBe(expected);
   });
 });
