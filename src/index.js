@@ -1,5 +1,7 @@
+import fs from 'fs';
+import path from 'path';
 import _ from 'lodash';
-import getConfigObject from './configParser';
+import getParser from './configParser';
 
 const isBothObjectsHaveKey = (key, obj1, obj2) => _.has(obj1, key) && _.has(obj2, key);
 
@@ -22,6 +24,13 @@ const computeObjDifference = (before, after) => {
     return [...acc, `  + ${afterString}`];
   }, []);
   return result;
+};
+
+const getConfigObject = (pathToFile) => {
+  const data = fs.readFileSync(pathToFile, 'utf8');
+  const ext = path.extname(pathToFile);
+  const parse = getParser(ext);
+  return parse(data);
 };
 
 export default (pathToFile1, pathToFile2) => {
