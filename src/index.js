@@ -3,26 +3,20 @@ import path from 'path';
 import _ from 'lodash';
 import getParser from './configParser';
 
-const isBothObjectsHaveKey = (key, obj1, obj2) => _.has(obj1, key) && _.has(obj2, key);
-
-const isObjectsValuesEqual = (key, obj1, obj2) => obj1[key] === obj2[key];
-
-const isRemovedValue = (key, obj) => !_.has(obj, key);
-
 const computeObjDifference = (before, after) => {
   const keysUnion = _.union(Object.keys(before), Object.keys(after));
-  const result = keysUnion.reduce((acc, key) => {
+  const result = keysUnion.map((key) => {
+    const isBothObjectsHaveKey = () => _.has(before, key) && _.has(after, key);
+    const isObjectsValuesEqual = () => before[key] === after[key];
+    const isRemovedValue = () => !_.has(after, key);
     const beforeString = `${key}: ${before[key]}`;
     const afterString = `${key}: ${after[key]}`;
-    if (isBothObjectsHaveKey(key, before, after)) {
-      return isObjectsValuesEqual(key, before, after) ? [...acc, `    ${beforeString}`]
-        : [...acc, `  - ${beforeString}`, `  + ${afterString}`];
+    if (isBothObjectsHaveKey()) {
+      return isObjectsValuesEqual() ? `    ${beforeString}`
+        : `  - ${beforeString}\n  + ${afterString}`;
     }
-    if (isRemovedValue(key, after)) {
-      return [...acc, `  - ${beforeString}`];
-    }
-    return [...acc, `  + ${afterString}`];
-  }, []);
+    return isRemovedValue() ? `  - ${beforeString}` : `  + ${afterString}`;
+  });
   return result;
 };
 
