@@ -16,4 +16,7 @@ describe('gendiff', () => {
   test('with plain json amd yaml', () => {
     expect(gendiff(`${beforeFilePath}.json`, `${afterFilePath}.yaml`)).toBe(expected);
   });
+  test('with plain ini', () => {
+    expect(gendiff(`${beforeFilePath}.ini`, `${afterFilePath}.ini`)).toBe(expected);
+  });
 });
