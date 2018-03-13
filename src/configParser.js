@@ -1,22 +1,28 @@
+import fs from 'fs';
+import path from 'path';
 import yaml from 'js-yaml';
 import ini from 'ini';
 
-const jsonParser = data => JSON.parse(data);
+const SUPPORTED_FORMATS = new Set(['.json', '.yaml', '.ini']);
 
-const yamlParser = data => yaml.safeLoad(data);
+const loadFile = filePath => ({
+  type: path.extname(filePath),
+  data: fs.readFileSync(filePath, 'utf8'),
+});
 
-const iniParser = data => ini.parse(data);
+const makeObject = {
+  '.json': data => JSON.parse(data),
+  '.yaml': data => yaml.safeLoad(data),
+  '.ini': data => ini.parse(data),
+};
 
-export default ({ type, data }) => {
-  switch (type) {
-    case '.json':
-      return jsonParser(data);
-    case '.yaml':
-      return yamlParser(data);
-    case '.ini':
-      return iniParser(data);
-    default:
-      throw new Error('unsupported file type');
+const isSupportedFormat = type => SUPPORTED_FORMATS.has(type);
+
+export default (filePath) => {
+  const { type, data } = loadFile(filePath);
+  if (!isSupportedFormat(type)) {
+    throw new Error('unsupported file type');
   }
+  return makeObject[type](data);
 };
 
