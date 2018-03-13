@@ -1,8 +1,9 @@
 import configParser from './configParser';
+import fileLoader from './fileLoader';
 
 export default (pathToFile1, pathToFile2) => {
-  const beforeConfig = configParser(pathToFile1);
-  const afterConfig = configParser(pathToFile2);
+  const beforeConfig = configParser(fileLoader(pathToFile1));
+  const afterConfig = configParser(fileLoader(pathToFile2));
   const removedOrChangedEntries = Object.keys(beforeConfig).reduce((acc, key) => {
     const beforeValue = beforeConfig[key];
     const afterValue = afterConfig[key];
