@@ -15,4 +15,3 @@ export default ext => (data) => {
   }
   return parser(data);
 };
-
