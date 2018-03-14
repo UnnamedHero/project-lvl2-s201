@@ -1,6 +1,6 @@
 {
   "name": "eem-hexlet-gendiff",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Hexlet education project #2",
   "main": "index.js",
   "files": [
