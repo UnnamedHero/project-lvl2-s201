@@ -3,7 +3,7 @@ import gendiff from '../src';
 
 const fixturePath = '__tests__/__fixtures__';
 
-describe('gendiff', () => {
+describe('gendiff#1', () => {
   const expected = fs.readFileSync(`${fixturePath}/plain/plain-expected.txt`, 'utf8');
   const beforeFilePath = `${fixturePath}/plain/before`;
   const afterFilePath = `${fixturePath}/plain/after`;
@@ -18,5 +18,14 @@ describe('gendiff', () => {
   });
   test('with plain ini', () => {
     expect(gendiff(`${beforeFilePath}.ini`, `${afterFilePath}.ini`)).toBe(expected);
+  });
+});
+
+describe('gendiff#2', () => {
+  const expected = fs.readFileSync(`${fixturePath}/nested/expected-json-like.txt`, 'utf8');
+  const beforeFilePath = `${fixturePath}/nested/before`;
+  const afterFilePath = `${fixturePath}/nested/after`;
+  test('with nested json', () => {
+    expect(gendiff(`${beforeFilePath}.json`, `${afterFilePath}.json`)).toBe(expected);
   });
 });
