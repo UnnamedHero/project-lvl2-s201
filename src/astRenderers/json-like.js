@@ -1,25 +1,24 @@
-// import _ from 'lodash';
-const renderResult = parsedAst => ['{', ...parsedAst, '}'].join('\n');
+import _ from 'lodash';
 
-
-const renderStrings = (stringItem) => {
-  const { key, beforeValue, afterValue, state } = stringItem;
-  const makeConfigString = value => ` ${key}: ${value}`;
-  switch (state) {
-    case 'unchanged':
-      return `   ${makeConfigString(beforeValue)}`;
-    case 'changed':
-      return `  -${makeConfigString(beforeValue)}\n  +${makeConfigString(afterValue)}`;
-    case 'removed':
-      return `  -${makeConfigString(beforeValue)}`;
-    case 'added':
-      return `  +${makeConfigString(afterValue)}`;
-    default:
-      return '';
-  }
+const spaces = num => ' '.repeat(num);
+const makeString = (key, value) => {
+  return `${spaces(2)}${key}: ${value}`;
 };
 
-export default () => ({
-  renderStrings,
-  renderResult,
-});
+const parseMeta = (keyMeta) => {
+  if (!_.isPlainObject(keyMeta)) {
+    return keyMeta;
+  }
+  return 'fucking obj!';
+};
+
+const prepareAst = (ast) => {
+  const parsedValues = _.keys(ast).reduce((acc, key) => {
+    const keyMeta = ast[key];
+    const { state } = keyMeta;
+    return [...acc, `${spaces(2)}${key}: ${parseMeta(keyMeta)}`];
+  }, []);
+  return ['{', ...parsedValues, '}'];
+};
+
+export default ast => prepareAst(ast).join('\n');

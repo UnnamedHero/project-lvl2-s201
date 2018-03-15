@@ -1,10 +1,11 @@
 import renderJsonLike from './astRenderers/json-like';
 
-const launchRender = (render, ast) => {
-  const { renderStrings, renderResult } = render();
-  const parsedAst = ast.map(renderStrings);
-  return renderResult(parsedAst);
-};
+// const launchRender = (render, ast) => {
+//   const { renderStrings, renderResult } = render();
+//   const renderedAst = ast.reduce(renderStrings, []);
+//   //console.log(renderResult(renderedAst));
+//   return renderResult(renderedAst);
+// };
 
 const renders = {
   'json-like': renderJsonLike,
@@ -15,6 +16,8 @@ export default renderType => (ast) => {
   if (!render) {
     throw new Error(`Unsupported output format '${renderType}'`);
   }
-  console.log(JSON.stringify(ast));
-  return launchRender(render, ast);
+  // console.log(JSON.stringify(ast));
+  const result = render(ast);
+  console.log(result);
+  return result;
 };
