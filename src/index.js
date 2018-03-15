@@ -6,36 +6,44 @@ import getRender from './astRenders';
 
 // TODO if both values are objects they must not be marked as "changed"
 const getDifferenceAst = (before, after) => {
-  const keysUnion = _.union(Object.keys(before), Object.keys(after));
-  const ast = keysUnion.map((key) => {
+  const keysUnion = _.union(_.keys(before), _.keys(after));
+  const ast = keysUnion.reduce((acc, key) => {
     const beforeValue = before[key];
     const afterValue = after[key];
     const isBothObjectsHaveKey = () => _.has(before, key) && _.has(after, key);
+    const isBothValuesAreObjects = () =>
+      _.isPlainObject(beforeValue) && _.isPlainObject(afterValue);
     const isObjectsValuesEqual = () => {
+      if (isBothValuesAreObjects()) {
+        return false;
+      }
       if (!_.isEqual(beforeValue, afterValue)) {
         return false;
       }
       return true;
     };
     const isRemovedValue = () => !_.has(after, key);
-    const makeAstNode = (state) => {
-      const astNode = {
-        key,
-        state,
-      };
-      if (_.isObject(beforeValue) && _.isObject(afterValue)) {
-        const children = getDifferenceAst(beforeValue, afterValue);
-        return { ...astNode, children };
-      }
-      return { ...astNode, beforeValue, afterValue };
-    };
-    // const beforeString = `${key}: ${before[key]}`;
-    // const afterString = `${key}: ${after[key]}`;
+    const makeNestedAstNode = () => ({
+      ...acc,
+      [key]: {
+        state: 'nested',
+        children: getDifferenceAst(beforeValue, afterValue),
+      },
+    });
+    const makeAstNode = state => ({
+      ...acc,
+      [key]: {
+        state, beforeValue, afterValue,
+      },
+    });
     if (isBothObjectsHaveKey()) {
+      if (isBothValuesAreObjects()) {
+        return makeNestedAstNode();
+      }
       return isObjectsValuesEqual() ? makeAstNode('unchanged') : makeAstNode('changed');
     }
     return isRemovedValue() ? makeAstNode('removed') : makeAstNode('added');
-  });
+  }, {});
   return ast;
 };
 
@@ -52,5 +60,6 @@ export default (pathToFile1, pathToFile2) => {
   const differenceAst = getDifferenceAst(beforeConfigObj, afterConfigObj);
   const renderType = 'json-like';
   const render = getRender(renderType);
+  // console.log(JSON.stringify(differenceAst));
   return render(differenceAst);
 };
