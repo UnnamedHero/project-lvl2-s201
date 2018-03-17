@@ -36,7 +36,7 @@ const astRender = (ast, depth = 0) => {
     changed: (node, nodeDepth) => {
       const removedStr = buildNodeString('  - ', node.key, node.oldValue, nodeDepth);
       const addedStr = nodeParsers.added(node, nodeDepth);
-      return `${removedStr}\n${addedStr}`;
+      return [removedStr, addedStr];
     },
   };
   const diffStrings = ast.map((node) => {
@@ -44,7 +44,8 @@ const astRender = (ast, depth = 0) => {
     return parser(node, depth);
   });
   const closeCurlyBrace = `${indent(depth)}}`;
-  return ['{', ...diffStrings, closeCurlyBrace].join('\n');
+  const flattenedChangedItems = _.flatten(diffStrings);
+  return ['{', ...flattenedChangedItems, closeCurlyBrace].join('\n');
 };
 
 export default astRender;
