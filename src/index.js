@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
 import getParser from './configParser';
-import getRender from './astRenders';
+import renderAst from './astRender';
 
 // TODO if both values are objects they must not be marked as "changed"
 const getDifferenceAst = (before, after) => {
@@ -23,19 +23,22 @@ const getDifferenceAst = (before, after) => {
       return true;
     };
     const isRemovedValue = () => !_.has(after, key);
-    const makeNestedAstNode = () => ({
-      ...acc,
-      [key]: {
-        state: 'nested',
+    const makeNestedAstNode = () => ([...acc,
+      {
+        keyName: key,
+        type: 'nested',
         children: getDifferenceAst(beforeValue, afterValue),
       },
-    });
-    const makeAstNode = state => ({
+    ]);
+    const makeAstNode = state => ([
       ...acc,
-      [key]: {
-        state, beforeValue, afterValue,
+      {
+        keyName: key,
+        state,
+        oldValue: beforeValue,
+        newValue: afterValue,
       },
-    });
+    ]);
     if (isBothObjectsHaveKey()) {
       if (isBothValuesAreObjects()) {
         return makeNestedAstNode();
@@ -43,7 +46,7 @@ const getDifferenceAst = (before, after) => {
       return isObjectsValuesEqual() ? makeAstNode('unchanged') : makeAstNode('changed');
     }
     return isRemovedValue() ? makeAstNode('removed') : makeAstNode('added');
-  }, {});
+  }, []);
   return ast;
 };
 
@@ -58,8 +61,8 @@ export default (pathToFile1, pathToFile2) => {
   const beforeConfigObj = getConfigObject(pathToFile1);
   const afterConfigObj = getConfigObject(pathToFile2);
   const differenceAst = getDifferenceAst(beforeConfigObj, afterConfigObj);
-  const renderType = 'json-like';
-  const render = getRender(renderType);
+  // const renderType = 'json-like';
+  return renderAst(differenceAst);
   // console.log(JSON.stringify(differenceAst));
-  return render(differenceAst);
+  // return render(differenceAst);
 };
