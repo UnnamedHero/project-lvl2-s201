@@ -4,49 +4,57 @@ import _ from 'lodash';
 import getParser from './configParser';
 import renderAst from './astRender';
 
-// TODO if both values are objects they must not be marked as "changed"
 const getDifferenceAst = (before, after) => {
   const keysUnion = _.union(_.keys(before), _.keys(after));
-  const ast = keysUnion.reduce((acc, key) => {
+  const ast = keysUnion.map((key) => {
     const beforeValue = before[key];
     const afterValue = after[key];
     const isBothObjectsHaveKey = () => _.has(before, key) && _.has(after, key);
     const isBothValuesAreObjects = () =>
       _.isPlainObject(beforeValue) && _.isPlainObject(afterValue);
-    const isObjectsValuesEqual = () => {
-      if (isBothValuesAreObjects()) {
-        return false;
-      }
-      if (!_.isEqual(beforeValue, afterValue)) {
-        return false;
-      }
-      return true;
-    };
+    const isObjectsValuesEqual = () => _.isEqual(beforeValue, afterValue);
     const isRemovedValue = () => !_.has(after, key);
-    const makeNestedAstNode = () => ([...acc,
-      {
-        keyName: key,
-        type: 'nested',
-        children: getDifferenceAst(beforeValue, afterValue),
-      },
-    ]);
-    const makeAstNode = state => ([
-      ...acc,
-      {
-        keyName: key,
-        state,
-        oldValue: beforeValue,
-        newValue: afterValue,
-      },
-    ]);
+    const buildAstNode = {
+      nested: () => (
+        {
+          key,
+          type: 'nested',
+          children: getDifferenceAst(beforeValue, afterValue),
+        }),
+      unchanged: () => (
+        {
+          key,
+          type: 'unchanged',
+          value: beforeValue,
+        }),
+      changed: () => (
+        {
+          key,
+          type: 'changed',
+          value: afterValue,
+          oldValue: beforeValue,
+        }),
+      added: () => (
+        {
+          key,
+          type: 'added',
+          value: afterValue,
+        }),
+      removed: () => (
+        {
+          key,
+          type: 'removed',
+          value: beforeValue,
+        }),
+    };
     if (isBothObjectsHaveKey()) {
       if (isBothValuesAreObjects()) {
-        return makeNestedAstNode();
+        return buildAstNode.nested();
       }
-      return isObjectsValuesEqual() ? makeAstNode('unchanged') : makeAstNode('changed');
+      return isObjectsValuesEqual() ? buildAstNode.unchanged() : buildAstNode.changed();
     }
-    return isRemovedValue() ? makeAstNode('removed') : makeAstNode('added');
-  }, []);
+    return isRemovedValue() ? buildAstNode.removed() : buildAstNode.added();
+  });
   return ast;
 };
 
@@ -61,8 +69,5 @@ export default (pathToFile1, pathToFile2) => {
   const beforeConfigObj = getConfigObject(pathToFile1);
   const afterConfigObj = getConfigObject(pathToFile2);
   const differenceAst = getDifferenceAst(beforeConfigObj, afterConfigObj);
-  // const renderType = 'json-like';
   return renderAst(differenceAst);
-  // console.log(JSON.stringify(differenceAst));
-  // return render(differenceAst);
 };
