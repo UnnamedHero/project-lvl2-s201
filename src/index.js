@@ -14,46 +14,38 @@ const getDifferenceAst = (before, after) => {
       _.isPlainObject(beforeValue) && _.isPlainObject(afterValue);
     const isObjectsValuesEqual = () => _.isEqual(beforeValue, afterValue);
     const isRemovedValue = () => !_.has(after, key);
-    const buildAstNode = {
-      nested: () => (
-        {
-          key,
-          type: 'nested',
-          children: getDifferenceAst(beforeValue, afterValue),
-        }),
-      unchanged: () => (
-        {
-          key,
-          type: 'unchanged',
-          value: beforeValue,
-        }),
-      changed: () => (
-        {
-          key,
-          type: 'changed',
+    const astNodes = [
+      {
+        type: 'nested',
+        check: () => isBothObjectsHaveKey() && isBothValuesAreObjects(),
+        getParts: () => ({ children: getDifferenceAst(beforeValue, afterValue) }),
+      },
+      {
+        type: 'unchanged',
+        check: () => isBothObjectsHaveKey() && isObjectsValuesEqual(),
+        getParts: () => ({ value: beforeValue }),
+      },
+      {
+        type: 'changed',
+        check: () => isBothObjectsHaveKey() && !isObjectsValuesEqual(),
+        getParts: () => ({
           value: afterValue,
           oldValue: beforeValue,
         }),
-      added: () => (
-        {
-          key,
-          type: 'added',
-          value: afterValue,
-        }),
-      removed: () => (
-        {
-          key,
-          type: 'removed',
-          value: beforeValue,
-        }),
-    };
-    if (isBothObjectsHaveKey()) {
-      if (isBothValuesAreObjects()) {
-        return buildAstNode.nested();
-      }
-      return isObjectsValuesEqual() ? buildAstNode.unchanged() : buildAstNode.changed();
-    }
-    return isRemovedValue() ? buildAstNode.removed() : buildAstNode.added();
+      },
+      {
+        type: 'removed',
+        check: () => isRemovedValue(),
+        getParts: () => ({ value: beforeValue }),
+      },
+      {
+        type: 'added',
+        check: () => !isRemovedValue(),
+        getParts: () => ({ value: afterValue }),
+      },
+    ];
+    const { type, getParts } = _.find(astNodes, ({ check }) => check());
+    return { key, type, ...getParts() };
   });
   return ast;
 };
