@@ -1,7 +1,8 @@
-import { jsonlike } from './renders';
+import { jsonlike, plain } from './renders';
 
 const renders = {
   jsonlike,
+  plain,
 };
 
 export default (renderType) => {
