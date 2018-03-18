@@ -1,37 +1,46 @@
 import fs from 'fs';
+import path from 'path';
 import gendiff from '../src';
 
-const fixturePath = '__tests__/__fixtures__';
+const fixturesPath = path.join(__dirname, '__fixtures__');
 
 describe('gendiff#1', () => {
-  const expected = fs.readFileSync(`${fixturePath}/plain/plain-expected.txt`, 'utf8');
-  const beforeFilePath = `${fixturePath}/plain/before`;
-  const afterFilePath = `${fixturePath}/plain/after`;
+  const plainFixturesPath = path.join(fixturesPath, 'plain');
+  const pathTo = file => path.join(plainFixturesPath, file);
+  const expected = fs.readFileSync(pathTo('expected-jsonlike.txt'), 'utf8');
+  const expetedPlain = fs.readFileSync(pathTo('expected-plain.txt'), 'utf-8');
   test('with plain json', () => {
-    expect(gendiff(`${beforeFilePath}.json`, `${afterFilePath}.json`)).toBe(expected);
+    expect(gendiff(pathTo('before.json'), pathTo('after.json'), 'jsonlike')).toBe(expected);
   });
   test('with plain yaml', () => {
-    expect(gendiff(`${beforeFilePath}.yaml`, `${afterFilePath}.yaml`)).toBe(expected);
+    expect(gendiff(pathTo('before.yaml'), pathTo('after.yaml'), 'jsonlike')).toBe(expected);
   });
   test('with plain json amd yaml', () => {
-    expect(gendiff(`${beforeFilePath}.json`, `${afterFilePath}.yaml`)).toBe(expected);
+    expect(gendiff(pathTo('before.json'), pathTo('after.yaml'), 'jsonlike')).toBe(expected);
   });
   test('with plain ini', () => {
-    expect(gendiff(`${beforeFilePath}.ini`, `${afterFilePath}.ini`)).toBe(expected);
+    expect(gendiff(pathTo('before.ini'), pathTo('after.ini'), 'jsonlike')).toBe(expected);
+  });
+  test('with json and plain output', () => {
+    expect(gendiff(pathTo('before.json'), pathTo('after.json'), 'plain')).toBe(expetedPlain);
   });
 });
 
 describe('gendiff#2', () => {
-  const expected = fs.readFileSync(`${fixturePath}/nested/expected-json-like.txt`, 'utf8');
-  const beforeFilePath = `${fixturePath}/nested/before`;
-  const afterFilePath = `${fixturePath}/nested/after`;
+  const nestedFixturesPath = path.join(fixturesPath, 'nested');
+  const pathTo = file => path.join(nestedFixturesPath, file);
+  const expected = fs.readFileSync(pathTo('expected-json-like.txt'), 'utf8');
+  const expectedPlain = fs.readFileSync(pathTo('expected-plain.txt'), 'utf8');
   test('with nested json', () => {
-    expect(gendiff(`${beforeFilePath}.json`, `${afterFilePath}.json`)).toBe(expected);
+    expect(gendiff(pathTo('before.json'), pathTo('after.json'), 'jsonlike')).toBe(expected);
   });
   test('with nested yml', () => {
-    expect(gendiff(`${beforeFilePath}.yml`, `${afterFilePath}.yml`)).toBe(expected);
+    expect(gendiff(pathTo('before.yml'), pathTo('after.yml'), 'jsonlike')).toBe(expected);
   });
   test('with nested ini', () => {
-    expect(gendiff(`${beforeFilePath}.ini`, `${afterFilePath}.ini`)).toBe(expected);
+    expect(gendiff(pathTo('before.ini'), pathTo('after.ini'), 'jsonlike')).toBe(expected);
+  });
+  test('with json and plain output', () => {
+    expect(gendiff(pathTo('before.json'), pathTo('after.json'), 'plain')).toBe(expectedPlain);
   });
 });
