@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
 import getParser from './configParser';
-import getRender from './astRender';
+import getRender from './renders';
 
 const getDifferenceAst = (before, after) => {
   const keysUnion = _.union(_.keys(before), _.keys(after));
@@ -61,7 +61,6 @@ export default (pathToFile1, pathToFile2, format) => {
   const beforeConfigObj = getConfigObject(pathToFile1);
   const afterConfigObj = getConfigObject(pathToFile2);
   const differenceAst = getDifferenceAst(beforeConfigObj, afterConfigObj);
-  // const renderType = 'jsonlike';
   const render = getRender(format);
   return render(differenceAst);
 };
